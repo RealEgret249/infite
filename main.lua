@@ -1,3 +1,7 @@
+--credits
+--GitHub: RealEgret249
+
+
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -11,7 +15,7 @@ end
 
 -- 📌 Fonction pour recréer l'UI après la mort
 local function recreateUI()
-	print("🔄 Recréation de l'UI...") -- Debug
+	 -- Debug
 
 	-- Supprime l'ancienne UI si elle existe
 	if screenGui then
@@ -46,11 +50,11 @@ local function recreateUI()
 	-- 🔘 Recréer les boutons
 	local infJumpButton = createStyledButton(screenGui, "Inf Jump", UDim2.new(0, 10, 0, 10), Color3.fromRGB(30, 30, 30))
 	local flyButton = createStyledButton(screenGui, "Fly", UDim2.new(0, 10, 0, 60), Color3.fromRGB(255, 215, 0))
-	local noClipButton = createStyledButton(screenGui, "No-Clip OFF", UDim2.new(0, 10, 0, 110), Color3.fromRGB(255, 0, 0))
+	local noClipButton = createStyledButton(screenGui, "No-Clip", UDim2.new(0, 10, 0, 110), Color3.fromRGB(255, 0, 0))
 	local godModeButton = createStyledButton(screenGui, "God Mode", UDim2.new(0, 10, 0, 160), Color3.fromRGB(128, 0, 128))
-	local killPartButton = createStyledButton(screenGui, "Killer Part", UDim2.new(0, 10, 0, 210), Color3.fromRGB(255, 69, 0))
+	
 
-	print("✅ Boutons recréés !") -- Debug
+	
 
 	-- 🏆 Inf Jump Toggle
 	local infJumpEnabled = false
@@ -77,6 +81,8 @@ local function recreateUI()
 
 	flyButton.MouseButton1Click:Connect(function()
 		flying = not flying
+		flyButton.Text = flying and "Fly: ON" or "Fly" 
+		flyButton.BackgroundColor3 = flying and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(255, 215, 0)
 		if flying then
 			bodyGyro = Instance.new("BodyGyro", character.PrimaryPart)
 			bodyGyro.P, bodyGyro.maxTorque = 9e4, Vector3.new(9e9, 9e9, 9e9)
@@ -209,76 +215,6 @@ local function recreateUI()
 		end
 	end)
 
-
-	-- Configuration
-	local KILLER_PART_DAMAGE = 100 -- Damage dealt by the Killer Part
-	local KILLER_PART_COLOR = Color3.fromRGB(255, 0, 0) -- Red color for the Killer Part
-	local KILLER_PART_SIZE = Vector3.new(5, 1, 5) -- Size of the Killer Part
-	local KILLER_PART_POSITION_OFFSET = Vector3.new(0, -3, 0) -- Position offset below the player
-
-	-- Function to create a Killer Part
-	local function createKillerPart()
-		-- Create the Killer Part
-		local killerPart = Instance.new("Part")
-		killerPart.Name = "KillerPart"
-		killerPart.Size = KILLER_PART_SIZE
-		killerPart.Position = character.PrimaryPart.Position + KILLER_PART_POSITION_OFFSET
-		killerPart.Anchored = true
-		killerPart.BrickColor = BrickColor.new(KILLER_PART_COLOR)
-		killerPart.Material = Enum.Material.Neon
-		killerPart.CanCollide = false
-		killerPart.CanTouch = true
-		killerPart.Parent = workspace
-
-		-- Add a hitbox (optional, for better collision detection)
-		local hitbox = Instance.new("BoxHandleAdornment")
-		hitbox.Size = killerPart.Size
-		hitbox.Adornee = killerPart
-		hitbox.Transparency = 0.5
-		hitbox.Color3 = KILLER_PART_COLOR
-		hitbox.ZIndex = 10
-		hitbox.Parent = killerPart
-
-		-- Function to handle player touch
-		local function onTouched(otherPart)
-			local touchedCharacter = otherPart.Parent
-			local humanoid = touchedCharacter:FindFirstChildOfClass("Humanoid")
-
-			if humanoid and humanoid ~= character:FindFirstChildOfClass("Humanoid") then
-				-- Check if the player has God Mode enabled
-				if humanoid:GetAttribute("GodModeEnabled") then
-					print("🛡️ God Mode protects the player!") -- Debug
-				else
-					-- Deal damage to the player
-					humanoid:TakeDamage(KILLER_PART_DAMAGE)
-					print("💀 Player touched the Killer Part!") -- Debug
-				end
-			end
-		end
-
-		-- Connect the Touched event
-		killerPart.Touched:Connect(onTouched)
-
-		return killerPart
-	end
-
-	-- Function to spawn the Killer Part
-	local function spawnKillerPart()
-		print("🔥 Spawning Killer Part...") -- Debug
-
-		if not character or not character.PrimaryPart then
-			print("⚠️ Error: character.PrimaryPart is missing!") -- Debug
-			return
-		end
-
-		-- Create the Killer Part
-		local killerPart = createKillerPart()
-		print("✅ Killer Part created at:", killerPart.Position) -- Debug
-	end
-
-	-- Example: Spawn the Killer Part when a button is clicked
-	local killPartButton = killPartButton
-		killPartButton.MouseButton1Click:Connect(spawnKillerPart)
 end
 
 -- 🌀 **Recréer l'UI à chaque respawn**
