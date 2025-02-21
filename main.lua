@@ -2,6 +2,7 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:FindFirstChildOfClass("Humanoid")
 local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
 
 -- Création de l'interface
 local screenGui = Instance.new("ScreenGui")
@@ -52,6 +53,7 @@ local infJumpEnabled = false
 infJumpButton.MouseButton1Click:Connect(function()
 	infJumpEnabled = not infJumpEnabled
 	infJumpButton.Text = infJumpEnabled and "Inf Jump: ON" or "Inf Jump: OFF"
+	infJumpButton.BackgroundColor3 = infJumpEnabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(30, 30, 30)
 end)
 
 userInputService.JumpRequest:Connect(function()
@@ -60,12 +62,16 @@ userInputService.JumpRequest:Connect(function()
 	end
 end)
 
--- 🚀 FLY
+-- 🚀 **FLY (Nouveau)**
 local flying = false
+local flySpeed = 50
 local bodyGyro, bodyVelocity
+local movement = {W = 0, A = 0, S = 0, D = 0, E = 0, Q = 0}
+
 flyButton.MouseButton1Click:Connect(function()
 	flying = not flying
 	flyButton.Text = flying and "Fly: ON" or "Fly: OFF"
+	flyButton.BackgroundColor3 = flying and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(255, 215, 0)
 
 	if flying then
 		bodyGyro = Instance.new("BodyGyro", character.PrimaryPart)
@@ -83,26 +89,60 @@ flyButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- 🏃‍♂️ NO-CLIP
-local noClipEnabled = false
-noClipButton.MouseButton1Click:Connect(function()
-	noClipEnabled = not noClipEnabled
-	noClipButton.Text = noClipEnabled and "No-Clip: ON" or "No-Clip: OFF"
-
-	if noClipEnabled then
-		game:GetService("RunService").Stepped:Connect(function()
-			if noClipEnabled then
-				for _, part in pairs(character:GetChildren()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = false
-					end
-				end
-			end
-		end)
+-- **Contrôle du Fly**
+userInputService.InputBegan:Connect(function(input)
+	if flying then
+		local key = input.KeyCode.Name
+		if movement[key] ~= nil then
+			movement[key] = 1
+		end
 	end
 end)
 
--- 🎭 Activer/Désactiver l'interface avec "U"
+userInputService.InputEnded:Connect(function(input)
+	if flying then
+		local key = input.KeyCode.Name
+		if movement[key] ~= nil then
+			movement[key] = 0
+		end
+	end
+end)
+
+runService.RenderStepped:Connect(function()
+	if flying and character.PrimaryPart then
+		bodyGyro.cframe = workspace.CurrentCamera.CFrame
+		local cam = workspace.CurrentCamera.CFrame
+		bodyVelocity.Velocity = (cam.LookVector * (movement.W - movement.S) * flySpeed) +
+			(cam.RightVector * (movement.D - movement.A) * flySpeed) +
+			Vector3.new(0, (movement.E - movement.Q) * flySpeed, 0)
+	end
+end)
+
+-- 🏃‍♂️ **NO-CLIP (Optimisé)**
+local noClipEnabled = false
+local noClipConnection
+
+noClipButton.MouseButton1Click:Connect(function()
+	noClipEnabled = not noClipEnabled
+	noClipButton.Text = noClipEnabled and "No-Clip: ON" or "No-Clip: OFF"
+	noClipButton.BackgroundColor3 = noClipEnabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(255, 0, 0)
+
+	if noClipEnabled then
+		noClipConnection = runService.Stepped:Connect(function()
+			for _, part in pairs(character:GetChildren()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
+		end)
+	else
+		if noClipConnection then
+			noClipConnection:Disconnect()
+		end
+	end
+end)
+
+-- 🎭 **Afficher/Cacher l'interface avec "U"**
 userInputService.InputBegan:Connect(function(input, gameProcessed)
 	if not gameProcessed and input.KeyCode == Enum.KeyCode.U then
 		screenGui.Enabled = not screenGui.Enabled
