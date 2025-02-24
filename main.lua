@@ -61,6 +61,7 @@ local function recreateUI()
 	local flyButton = createStyledButton(screenGui, "Fly", UDim2.new(0, 10, 0, 60), Color3.fromRGB(255, 215, 0))
 	local noClipButton = createStyledButton(screenGui, "No-Clip", UDim2.new(0, 10, 0, 110), Color3.fromRGB(255, 0, 0))
 	local godModeButton = createStyledButton(screenGui, "God Mode", UDim2.new(0, 10, 0, 160), Color3.fromRGB(128, 0, 128))
+	local espButton = createStyledButton(screenGui, "ESP", UDim2.new(0, 10, 0, 210), Color3.fromRGB(85, 170, 0))
 
 
 	
@@ -225,6 +226,87 @@ local function recreateUI()
 			end
 		end
 	end)
+	local espEnabled = false
+	local Players = game:GetService("Players")
+
+	-- Fonction pour ajouter un effet de surbrillance au personnage d'un joueur
+	local function highlightPlayer(player)
+		if player.Character then
+			if not player.Character:FindFirstChild("Highlight") then
+				local highlight = Instance.new("Highlight")
+				highlight.Parent = player.Character
+				highlight.FillColor = Color3.fromRGB(255, 255, 0)  -- Jaune
+				highlight.OutlineColor = Color3.fromRGB(0, 0, 0)   -- Noir
+				highlight.FillTransparency = 0.5                   -- Semi-transparent
+				highlight.OutlineTransparency = 0                  -- Contour solide
+			end
+		end
+	end
+
+	-- Fonction pour supprimer l'effet de surbrillance du personnage d'un joueur
+	local function unhighlightPlayer(player)
+		if player.Character then
+			local highlight = player.Character:FindFirstChild("Highlight")
+			if highlight then
+				highlight:Destroy()
+			end
+		end
+	end
+
+	-- Fonction pour activer/désactiver l'ESP
+	local function toggleESP()
+		espEnabled = not espEnabled
+
+		if espEnabled then
+			-- Activer l'ESP : Ajouter des surbrillances à tous les joueurs
+			for _, player in ipairs(Players:GetPlayers()) do
+				highlightPlayer(player)
+
+				-- Écouter l'événement CharacterAdded pour les respawns
+				player.CharacterAdded:Connect(function()
+					highlightPlayer(player)
+				end)
+
+				-- Écouter l'événement CharacterRemoving pour la mort
+				player.CharacterRemoving:Connect(function()
+					unhighlightPlayer(player)
+				end)
+			end
+
+			-- Connecter l'événement pour les nouveaux joueurs
+			Players.PlayerAdded:Connect(function(player)
+				highlightPlayer(player)
+
+				-- Écouter l'événement CharacterAdded pour les respawns
+				player.CharacterAdded:Connect(function()
+					highlightPlayer(player)
+				end)
+
+				-- Écouter l'événement CharacterRemoving pour la mort
+				player.CharacterRemoving:Connect(function()
+					unhighlightPlayer(player)
+				end)
+			end)
+		else
+			-- Désactiver l'ESP : Supprimer les surbrillances de tous les joueurs
+			for _, player in ipairs(Players:GetPlayers()) do
+				unhighlightPlayer(player)
+			end
+		end
+	end
+
+	-- Mettre à jour le texte du bouton ESP
+	local function updateESPButton()
+		espButton.Text = espEnabled and "ESP: ON" or "ESP"
+		espButton.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(85, 170, 0)
+	end
+
+	-- Connecter le bouton ESP pour activer/désactiver l'ESP
+	espButton.MouseButton1Click:Connect(function()
+		toggleESP()
+		updateESPButton()
+	end)
+
 	local Toggle = Instance.new("TextLabel")
 	Toggle.TextSize = 24
 	Toggle.Text = "Ctrl to toggle"
