@@ -12,10 +12,13 @@ local screenGui = player:FindFirstChild("PlayerGui"):FindFirstChild("CustomUI")
 if screenGui then
 	screenGui:Destroy()
 end
-
+local ToggleGui = player:FindFirstChild("PlayerGui"):FindFirstChild("CustomUI")
+if ToggleGui then
+	ToggleGui:Destroy()
+end
 -- 📌 Fonction pour recréer l'UI après la mort
 local function recreateUI()
-	 -- Debug
+	-- Debug
 
 	-- Supprime l'ancienne UI si elle existe
 	if screenGui then
@@ -26,7 +29,11 @@ local function recreateUI()
 	screenGui = Instance.new("ScreenGui")
 	screenGui.Name = "CustomUI"
 	screenGui.Parent = player:WaitForChild("PlayerGui")
-	screenGui.Enabled = true -- Afficher l'UI par défaut
+	screenGui.Enabled = false
+	ToggleGui = Instance.new("ScreenGui")
+	ToggleGui.Name = "CustomUI"
+	ToggleGui.Parent = player:WaitForChild("PlayerGui")
+	ToggleGui.Enabled = true
 
 	-- Fonction pour créer des boutons
 	local function createStyledButton(parent, text, position, color)
@@ -39,6 +46,8 @@ local function recreateUI()
 		button.Text = text
 		button.Font = Enum.Font.GothamBold
 		button.Parent = parent
+		button.BackgroundTransparency = 0.5
+		button.ZIndex = 10
 
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(0, 10)
@@ -52,15 +61,17 @@ local function recreateUI()
 	local flyButton = createStyledButton(screenGui, "Fly", UDim2.new(0, 10, 0, 60), Color3.fromRGB(255, 215, 0))
 	local noClipButton = createStyledButton(screenGui, "No-Clip", UDim2.new(0, 10, 0, 110), Color3.fromRGB(255, 0, 0))
 	local godModeButton = createStyledButton(screenGui, "God Mode", UDim2.new(0, 10, 0, 160), Color3.fromRGB(128, 0, 128))
-	
+
 
 	
+
+
 
 	-- 🏆 Inf Jump Toggle
 	local infJumpEnabled = false
 	infJumpButton.MouseButton1Click:Connect(function()
 		infJumpEnabled = not infJumpEnabled
-		infJumpButton.Text = infJumpEnabled and "Inf Jump: ON" or "Inf Jump: OFF"
+		infJumpButton.Text = infJumpEnabled and "Inf Jump: ON" or "Inf Jump"
 		infJumpButton.BackgroundColor3 = infJumpEnabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(30, 30, 30)
 	end)
 
@@ -156,7 +167,7 @@ local function recreateUI()
 	local noClipEnabled = false
 	noClipButton.MouseButton1Click:Connect(function()
 		noClipEnabled = not noClipEnabled
-		noClipButton.Text = noClipEnabled and "No-Clip: ON" or "No-Clip: OFF"
+		noClipButton.Text = noClipEnabled and "No-Clip: ON" or "No-Clip"
 		noClipButton.BackgroundColor3 = noClipEnabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(255, 0, 0)
 
 		-- Activer/désactiver le No-Clip
@@ -186,7 +197,7 @@ local function recreateUI()
 	local godModeEnabled = false
 	godModeButton.MouseButton1Click:Connect(function()
 		godModeEnabled = not godModeEnabled
-		godModeButton.Text = godModeEnabled and "God Mode: ON" or "God Mode: OFF"
+		godModeButton.Text = godModeEnabled and "God Mode: ON" or "God Mode"
 		godModeButton.BackgroundColor3 = godModeEnabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(128, 0, 128)
 
 		if godModeEnabled then
@@ -198,7 +209,7 @@ local function recreateUI()
 				-- Empêcher toute modification de la santé
 				humanoid:GetPropertyChangedSignal("Health"):Connect(function()
 					if godModeEnabled then
-						
+
 						humanoid.Health = math.huge
 					end
 				end)
@@ -214,6 +225,25 @@ local function recreateUI()
 			end
 		end
 	end)
+	local Toggle = Instance.new("TextLabel")
+	Toggle.TextSize = 24
+	Toggle.Text = "Ctrl to toggle"
+	Toggle.Position = UDim2.new(0.41, 0,0, 0)
+	Toggle.TextColor3 = Color3.fromRGB(255,255,255)
+	Toggle.BackgroundTransparency = 1
+	Toggle.Parent = ToggleGui
+	Toggle.Size = UDim2.new(0, 180, 0, 40)
+	wait(5)
+	Toggle.TextTransparency = 0.1
+	wait(0.1)
+	Toggle.TextTransparency = 0.3
+	wait(0.1)
+	Toggle.TextTransparency = 0.5
+	wait(0.1)
+	Toggle.TextTransparency = 0.7
+	wait(0.1)
+	Toggle.TextTransparency = 0.9
+	Toggle:Destroy()
 
 end
 
@@ -230,7 +260,7 @@ end)
 
 -- 🎭 **Afficher/Cacher l'interface avec "U"**
 userInputService.InputBegan:Connect(function(input, gameProcessed)
-	if not gameProcessed and input.KeyCode == Enum.KeyCode.U then
+	if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl or  input.KeyCode == Enum.KeyCode.RightControl then
 		screenGui.Enabled = not screenGui.Enabled
 		print("🎭 UI Toggle: " .. tostring(screenGui.Enabled)) -- Debug
 	end
@@ -238,3 +268,4 @@ end)
 
 -- 🏁 **Démarrage Initial**
 recreateUI()
+
